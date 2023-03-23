@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+
+    php:
+      build:
+        context: ./php
+       
+      volumes:
+       - './src:/var/www/html'
+       - './php/ini:/usr/local/etc/php'
+      links:
+       - mysql
+      networks:
+       default:
+         ipv4_address: 172.16.0.4
+      
+    nginx:
+      image: nginx:latest
+      ports:
+       - 80:80
+      volumes:
+       - './src:/var/www/html'
+       - './nginx:/etc/nginx/conf.d'
+      links:
+        - php
+      networks:
+       default:
+         ipv4_address: 172.16.0.3
+      
+    
+    mysql:
+      image: mysql:8
+      ports:
+        - "3306:3306"
+      environment:
+        - MYSQL_ROOT_PASSWORD=root
+      volumes:
+        - ./db:/var/lib/mysql
+      networks:
+       default:
+         ipv4_address: 172.16.0.2
+
+      
+networks:
+    default:
+      driver: bridge
+      ipam:
+        config:
+         - subnet: 172.16.0.0/24
